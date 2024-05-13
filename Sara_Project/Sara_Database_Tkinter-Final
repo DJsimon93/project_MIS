@@ -1,0 +1,96 @@
+# Import required libraries
+import sqlite3
+import csv
+import tkinter as tk
+
+############################## Dtabase Design ###########################
+def initialize_database():
+    try:
+        # Create SQLite database 
+        conn = sqlite3.connect('medications.db')
+        cursor = conn.cursor()
+        # Create medications table with only medication names
+        cursor.execute('''CREATE TABLE medications (
+                            Medication_1 TEXT,
+                            Medication_2 TEXT
+                        )''')
+
+        # Read CSV and insert data into SQLite
+        with open('Drugbank4-PDDIs.csv', 'r', encoding='utf-8') as csvfile:
+            # Iterate through each line in the CSV file
+            for line in csvfile:
+                # Split each line into two medication pairs using the "$" delimiter
+                medication1, medication2 = line.strip().split('$')[1], line.strip().split('$')[3]
+                
+                # Insert medication pairs into the SQLite database
+                cursor.execute("INSERT INTO medications VALUES (?, ?)", (medication1, medication2))
+
+        # Commit changes and close connection
+        conn.commit()
+        conn.close()
+    except sqlite3.Error as e:
+        print("Database initialization error:", e)
+
+def check_interaction():
+    # Get medicine names from input fields
+    medicine1 = entry1.get()
+    medicine2 = entry2.get()
+    
+    try:
+        # Query SQLite database to check for interaction
+        cursor.execute("SELECT * FROM medications WHERE Medication_1 = ? AND Medication_2 = ? OR Medication_1 = ? AND Medication_2 = ?", (medicine1, medicine2, medicine2, medicine1))
+        interaction = cursor.fetchone()
+
+        # Display result based on interaction
+        if interaction:
+            label_result.config(text="DANGER: Interaction detected")
+        else:
+            label_result.config(text="No danger: No interaction detected")
+    except sqlite3.Error as e:
+        # Display error message to the user
+        label_result.config(text="Database error: " + str(e))
+
+# Initialize database
+initialize_database()
+
+# Connect to SQLite database
+try:
+    conn = sqlite3.connect('medications.db')
+    cursor = conn.cursor()
+except sqlite3.Error as e:
+    # Display error message to the user
+    print("Database connection error:", e)
+    exit()
+
+
+######################### Tkinter GUI app ###############################
+# Create Tkinter window
+root = tk.Tk()
+root.title("Medicine Interaction Checker")
+
+# Create input fields and labels
+label1 = tk.Label(root, text="Enter Medicine 1:")
+label1.grid(row=0, column=0, padx=10, pady=5)
+entry1 = tk.Entry(root)
+entry1.grid(row=0, column=1, padx=10, pady=5)
+
+label2 = tk.Label(root, text="Enter Medicine 2:")
+label2.grid(row=1, column=0, padx=10, pady=5)
+entry2 = tk.Entry(root)
+entry2.grid(row=1, column=1, padx=10, pady=5)
+
+button_check = tk.Button(root, text="Check Interaction", command=check_interaction)
+button_check.grid(row=2, column=0, columnspan=2, pady=10)
+
+label_result = tk.Label(root, text="")
+label_result.grid(row=3, column=0, columnspan=2)
+
+# Run Tkinter event loop
+root.mainloop()
+
+# Close database connection
+try:
+    conn.close()
+except sqlite3.Error as e:
+    # Display error message (optional)
+    print("Database connection closure error:", e)

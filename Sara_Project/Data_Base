@@ -1,0 +1,52 @@
+import sqlite3
+import csv
+
+# Step 1: Create SQLite database 
+conn = sqlite3.connect('medications.db')
+cursor = conn.cursor()
+
+# Step 2: Create medications table with only medication names
+cursor.execute('''CREATE TABLE medications (
+                    Medication_1 TEXT,
+                    Medication_2 TEXT
+                )''')
+
+# Step 3: Read CSV and insert data into SQLite
+with open('Drugbank4-PDDIs.csv', 'r', encoding='utf-8') as csvfile:
+    # Iterate through each line in the CSV file
+    for line in csvfile:
+        # Split each line into two medication pairs using the "$" delimiter
+        medication1, medication2 = line.strip().split('$')[1], line.strip().split('$')[3]
+        
+        # Insert medication pairs into the SQLite database
+        cursor.execute("INSERT INTO medications VALUES (?, ?)", (medication1, medication2))
+
+# Commit changes and close connection
+conn.commit()
+conn.close()
+
+
+# Code to displat the database content
+import sqlite3
+
+# Connect to SQLite database
+conn = sqlite3.connect('medications.db')
+cursor = conn.cursor()
+
+# Display table structure
+cursor.execute("PRAGMA table_info(medications)")
+table_structure = cursor.fetchall()
+print("Table Structure:")
+for column in table_structure:
+    print(column)
+
+# Display table contents
+cursor.execute("SELECT * FROM medications")
+table_contents = cursor.fetchall()
+print("\nTable Contents:")
+for row in table_contents:
+    print(row)
+
+# Close connection
+conn.close()
+
