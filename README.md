@@ -1,4 +1,4 @@
-# Drug-Drug Interaction Checker
+# Drug-Drug Interaction Checker prototype
 ## Overview
 This is our project for the Medical Information Systems course. The Drug-Drug Interaction Checker is an application designed to help users identify potential interactions between different medications. By inputting the names of two or more drugs, the app provides information on any known interactions, their severity, and possible side effects.
 
