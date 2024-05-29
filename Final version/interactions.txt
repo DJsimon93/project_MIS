@@ -1,0 +1,6 @@
+Drug list:
+- Nicotine
+- Caffeine
+
+Dangerous interactions:
+
